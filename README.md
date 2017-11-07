@@ -1,0 +1,2 @@
+# guetzli
+Wordpress Cli Plugin
