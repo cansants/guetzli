@@ -2,8 +2,9 @@
 
 VERSION="1.0"
 BIN="/traspas/guetzli/lib/guetzli"
+BIN_PNG="optipng"
 COMPRESION=86
-BKPSUFIX=".bak"
+BKPSUFIX=".copy"
 LIST="/tmp/.cli-guetzli.list"
 
 
@@ -22,6 +23,7 @@ echo "$(date +"%F %T") Delete previous list"
 
 ## buscamos las imagenes 
 find $1 \( -iname \*.png -o -iname \*.jpg \)  -exec ls {} \; > $LIST
+#find $1 \( -iname \*.jpg \)  -exec ls {} \; > $LIST
 
 
 while read img; do
@@ -37,16 +39,36 @@ while read img; do
     cp "${origen}" "${backup}"
     echo "$(date +"%F %T") Backup created $backup"
     
-    ## Iniciamos la compresion
-    echo "$(date +"%F %T") Started compresion ($COMPRESION%) ${backup}"
-	$BIN --quality $COMPRESION "${origen}" "${origen}"    
+    if [[ $(file -b "${origen}") =~ ^'JPEG ' ]]; then 
+    
+      ## Iniciamos la compresion JPG
+      echo "$(date +"%F %T") Started compresion ($COMPRESION%) ${origen}"
+	  ${BIN} --quality ${COMPRESION} "${origen}" "${origen}"    
+    
+    else
+    
+      ## Iniciamos la compresion JPG
+      echo "$(date +"%F %T") Started compresion ($COMPRESION%) ${origen}"
+      ${BIN_PNG} -quiet -o7 "${origen}"  
+    
+    fi
     
     ORIGINAL_FILESIZE=$(stat -c%s "$backup")
     COMPRESS_FILESIZE=$(stat -c%s "$origen")
     
     SAVED_BYTES=$(($ORIGINAL_FILESIZE-$COMPRESS_FILESIZE))
     
-    echo "$(date +"%F %T") Saved ${SAVED_BYTES} bytes ${origen}"
+    if (( SAVED_BYTES < 0 )); then
+      ## No ahorramos bytes!
+      echo "$(date +"%F %T") Restored backup for ${origen}"
+      cp "${backup}" "${origen}"
+      
+    else
+      echo "$(date +"%F %T") Saved ${SAVED_BYTES} bytes ${origen}"	
+      
+    fi
+    
+    
     
   else
   	echo "$(date +"%F %T") Backup exists ${backup}"

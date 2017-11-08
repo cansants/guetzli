@@ -3,7 +3,7 @@
 VERSION="1.0"
 BIN="/traspas/guetzli/lib/guetzli"
 COMPRESION=86
-BKPSUFIX=".bak"
+BKPSUFIX=".copy"
 LIST="/tmp/.cli-guetzli-restore.list"
 
 
@@ -20,7 +20,7 @@ rm $LIST
 echo "$(date +"%F %T") Delete previous list"
 
 ## buscamos las imagenes 
-find $1 \( -iname \*.bak \) -exec ls {} \; > $LIST
+find $1 \( -iname \*$BKPSUFIX \) -exec ls {} \; > $LIST
 
 
 while read img; do
